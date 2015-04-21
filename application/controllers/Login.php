@@ -15,6 +15,7 @@ class Login extends MY_Controller
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('guests');
     }
     
     /**
@@ -22,30 +23,81 @@ class Login extends MY_Controller
      */
     public function index()
 	{
-		$this->data['page_body'] = 'login';
-        $this->render();
+            $result = "Not Logged In";
+            // if already logged in, display username and log out option in {result}
+            if ($this->session->has_userdata('username'))
+            {
+                redirect('/');
+            }
+            
+            $this->data['result'] = $result;            
+            $this->data['page_body'] = 'login';
+            $this->render();
 	}
-    
-    /**
-     * Login as a normal user (dummy function).
-     */
-    public function user()
+        
+        /**
+         * 
+         * Authenticates the user and redirects as needed.
+         * If valid, creates session data for them.
+         */
+    public function authenticate()
     {
-        $this->session->set_userdata('username', 'guest');
-        $this->session->set_userdata('is_admin', false);
+        // ensure feilds are filled in
+        if($this->blank_entries())
+        {
+            $this->invalid("You must fill in both User Name and Password!");
+            return;
+        }
+        
+        //get input
+        $username = $this->input->post('user_name');
+        $password = $this->input->post('password');
+        
+        $guest = $this->groups->get_by_username($username);
+        //valid username?
+        if($guest == null)
+        {
+            $this->invalid("Username does not Exist");
+            return;
+        }
+        // valid password?
+        if($guest->password != $password )
+        {
+            $this->invalid("Invalid Password");
+            return;
+        }
+        // legit, set session variables
+        $this->session->set_userdata('username', $username);
+        if($username == "Admin!")
+        {
+            $this->session->set_userdata('is_admin', true);
+        }
+        else
+        {
+            $this->session->set_userdata('is_admin', false);
+        }
         redirect('/');
     }
     
-    /**
-     * Login as an admin user (dummy function).
-     */
-    public function admin()
+    // displays login page with an error message
+    private function invalid($result)
     {
-        $this->session->set_userdata('username', 'admin');
-        $this->session->set_userdata('is_admin', true);
-        redirect('/');
+        $this->data['result'] = $result;
+        $this->data['page_body'] = 'login';
+        $this->render();
+        return;
     }
-    
+    /**
+     * 
+     * returns true if pass or user are not filled in
+     */
+    private function blank_entries()
+    {
+        $user = "" . $this->input->post('user_name');
+        $pass = "" . $this->input->post('password');
+        return $user == ""  || $pass == "";
+    }
+        
     /**
      * Logout and destroys the current session.
      */

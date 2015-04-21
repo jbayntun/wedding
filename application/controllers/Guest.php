@@ -16,8 +16,8 @@ class Guest extends MY_Controller
     {
         parent::__construct();
         $this->load->model('guests');
-        $this->load->model('responses');
-    }
+        $this->load->model('responses'); 
+   }
     
     /**
 	 * Index page for this controller.
@@ -40,14 +40,8 @@ class Guest extends MY_Controller
             return;
         }
         
-        //User is logged in as a guest. right now we dont distinguish
-       //  between guests, so I'm hard coding a group
         $group = $this->groups->get_by_username(
                  $this->session->userdata('username'));
-          
-
-      //  $group = $this->groups->get_by_username(
-        //         $this->session->userdata('mom'));
         
         $this->get_guests($group);
         
