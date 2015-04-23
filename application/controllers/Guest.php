@@ -73,7 +73,10 @@ class Guest extends MY_Controller
         $this->update_guests($group);
         $group->notes = $this->input->post('notes');
         $this->groups->update($group);
-        redirect('/guest');
+        
+        $this->data['page_body']  = 'thankyou';
+        $this->data['message'] = 'Thank you for RSVPing! Your changes have been saved.';
+        $this->render();
     }
     
     /**
