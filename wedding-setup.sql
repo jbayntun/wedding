@@ -142,7 +142,7 @@ VALUES
 INSERT INTO `group`
     (`name`, `username`, `password`)
 VALUES
-    ('admin', 'Admin!', '$2y$10$AgREp4ojLvRS7O6Z/0wnI.zYvktHQiD1lzTkQRmUR4vX1wFKjWi0a');
+    ('admin', 'Admin!', '');
 
 INSERT INTO `guest`
     (`group_id`, `response_id`, `first_name`, `last_name`)
