@@ -310,6 +310,12 @@ class Guest extends MY_Controller
      */
     public function delete_group($group_id)
     {
+        if (!$this->session->userdata('is_admin'))
+        {
+            // No access if not admin.
+            redirect('/not_admin');
+        }
+        
         $guests = $this->groups->get_guests($group_id);
         
         foreach($guests as $guest)
@@ -371,8 +377,7 @@ class Guest extends MY_Controller
             $guest->response_id = $this->input->post('guest_' . $guest->id);
             $this->guests->update($guest);
         }
-    }
-    
+    }    
     
 }
 
