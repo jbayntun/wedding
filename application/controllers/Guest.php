@@ -208,7 +208,7 @@ class Guest extends MY_Controller
         $this->data['page_body']  = 'guests/admin_one';
         $this->data['id'] = $group->id;
         $this->data['group_name'] = $group->name;
-        $this->data['password'] = $group->password;
+        $this->data['password'] = $group->value;
         $this->data['guests']  = $group->guests;
         $this->data['notes']   = $group->notes;
         $this->data['username'] = $group->username;
@@ -242,7 +242,8 @@ class Guest extends MY_Controller
         $group = $this->groups->create();
         $group->name = $this->input->post('group_name');
         $group->username = $this->input->post('username');
-        $group->password = $group->username . rand(100, 9999);
+        $group->value = $group->username . rand(100, 9999);
+        $group->password = password_hash( str_replace(array('"', "'"), '', $group->value), PASSWORD_DEFAULT);
         $this->groups->add($group);
         
         $group_id = $this->groups->highest();
@@ -274,7 +275,7 @@ class Guest extends MY_Controller
         $group = $this->groups->get($group_id);
         $this->data['group_name'] = $group->name;
         $this->data['username'] = $group->username;
-        $this->data['password'] = $group->password;
+        $this->data['password'] = $group->value;
         $this->data['id'] = $group->id;
                 
         $this->data['page_body']  = 'guests/edit_group';
@@ -296,7 +297,8 @@ class Guest extends MY_Controller
         $group = $this->groups->get($group_id);
         $group->name = $this->input->post('group_name');
         $group->username = $this->input->post('username');
-        $group->password = $this->input->post('password');
+        $group->password = password_hash( $this->input->post('password'), PASSWORD_DEFAULT );
+        $group->value = '';
         $this->groups->update($group);
         
         redirect('/guest/admin_show_group/' . $group_id);

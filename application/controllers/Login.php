@@ -34,7 +34,7 @@ class Login extends MY_Controller
             $this->data['page_body'] = 'login';
             $this->render();
 	}
-        
+                
         /**
          * 
          * Authenticates the user and redirects as needed.
@@ -61,7 +61,7 @@ class Login extends MY_Controller
             return;
         }
         // valid password?
-        if($guest->password != $password )
+        if( !password_verify($password, $guest->password) )
         {
             $this->invalid("Invalid Password");
             return;
