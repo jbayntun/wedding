@@ -1,5 +1,5 @@
 <h2>Guest <span>Response</span></h2>
-
+<p>To ensure smooth planning, please RSVP no later than August 9th. </p>
 <form action="/guest/respond" method="post">
     <table>
         <tr>

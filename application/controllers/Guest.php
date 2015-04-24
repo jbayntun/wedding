@@ -92,8 +92,53 @@ class Guest extends MY_Controller
         
         $groups = $this->groups->all();
         
+        $total_yes = 0;
+        $total_no = 0;
+        $total_maybe = 0;
+        $total = 0;
+        
+        foreach($groups as $g)
+        {
+            if($g->name == 'admin')
+            {
+                continue;
+            }
+            $this->get_guests_admin($g);
+            $g->yes = 0;
+            $g->no = 0;
+            $g->size = 0;
+            $g->maybe = 0;
+            
+            foreach($g->guests as $guest)
+            {
+                switch($guest->response_id)
+                {
+                    case 0: // yes
+                        $g->yes++;
+                        $total_yes++;
+                        break;
+                    case 1: // no
+                        $g->no++;
+                        $total_no++;
+                        break;
+                    default: // unknown
+                        $total_maybe++;
+                        $g->maybe++;
+                        break;
+                }
+                $g->size++;
+                $total++;
+            }
+        }
+        
+        //groups need a size, yes and no property.
+        
         $this->data['page_body']  = 'guests/admin_all';
         $this->data['groups'] = $groups;
+        $this->data['yes'] = $total_yes;
+        $this->data['no'] = $total_no;
+        $this->data['maybe'] = $total_maybe;
+        $this->data['invited'] = $total;
         $this->render();
     }
     

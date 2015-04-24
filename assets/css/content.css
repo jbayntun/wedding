@@ -138,3 +138,9 @@
     display: inline-block;
     margin: 0 0 0.1em;
 }
+
+.bold {
+    font-weight: bold;
+    padding-right: 10px;
+    margin-left: 10px;
+}
