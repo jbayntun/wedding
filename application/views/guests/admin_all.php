@@ -1,5 +1,7 @@
 <h2>Manage <span>Guests</span></h2>
 
+<p><a href="/mailer">Send Emails</a></p>
+
 <p><a href="/guest/add_group">Add New Group</a></p>
 
 <p>
