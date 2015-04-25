@@ -23,7 +23,7 @@ class Login extends MY_Controller
      */
     public function index()
 	{
-            $result = "Not Logged In";
+            $result = "";
             // if already logged in, display username and log out option in {result}
             if ($this->session->has_userdata('username'))
             {
