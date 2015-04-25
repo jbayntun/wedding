@@ -20,7 +20,7 @@ body {
 
 .wrapper {
 	margin: 0 auto;
-	width: 800px;
+	width: 60%;
 }
 
 /* main layout */
@@ -46,7 +46,7 @@ h3 {
 	margin: 1em 0 0.5em;
 }
 
-h1 span, h2 span, h3 span {
+h1 span, h2 span, h3 span, .home_wide span {
 	color: #39baf8;
 }
 

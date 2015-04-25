@@ -144,3 +144,17 @@
     padding-right: 10px;
     margin-left: 10px;
 }
+
+.home_wide {
+    margin: 5px -150px 35px -150px;
+    color: #666666;
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 2.8em;
+    letter-spacing: -1px;
+    line-height: 1.1em;
+    text-align: center;
+}
+
+.center {
+    text-align: center;
+}
