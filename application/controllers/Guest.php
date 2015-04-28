@@ -48,7 +48,6 @@ class Guest extends MY_Controller
         $this->data['group_name'] = $group->name;
         $this->data['responses']  = $this->responses->all();
         $this->data['guests']     = $group->guests;
-        $this->data['notes']      = $group->notes;
         $this->data['page_body']  = 'guests/guest';
         $this->render();
     }
@@ -71,13 +70,20 @@ class Guest extends MY_Controller
                  $this->session->userdata('username'));
         
         $this->update_guests($group);
-        $group->notes = $this->input->post('notes');
         $this->groups->update($group);
-        
-        $this->data['page_body']  = 'thankyou';
-        $this->data['message'] = 'Thank you for RSVPing! Your changes have been saved.';
-        $this->render();
+		
+		$message = 'Thank you for RSVPing! Your changes have been saved.';
+		$this->thankyou($message);
     }
+	/**
+	* Displays a thank you message
+	*/
+	public function thankyou($message)
+	{
+		$this->data['page_body']  = 'thankyou';
+        $this->data['message'] = $message;
+        $this->render();
+	}
     
     /**
      * Loads the admin version of this page.
@@ -258,7 +264,6 @@ class Guest extends MY_Controller
         $this->data['group_name'] = $group->name;
         $this->data['password'] = $group->value;
         $this->data['guests']  = $group->guests;
-        $this->data['notes']   = $group->notes;
         $this->data['username'] = $group->username;
         $this->render();
     }
@@ -426,6 +431,21 @@ class Guest extends MY_Controller
             $this->guests->update($guest);
         }
     }    
+	
+	public function email()
+	{
+		if (!$this->session->has_userdata('username'))
+		{
+			// User is not logged in.
+			$this->data['page_body'] = '/login';
+			$this->render();
+			return;
+		}
+		
+		$this->data['page_body']  = 'guests/email';
+        $this->render();
+		
+	}
     
 }
 

@@ -17,12 +17,12 @@
         </tr>
         {/guests}
     </table>
+    <input type="submit" value="Submit"> 
+	</form>
+	
+	<p>Need to get in Touch with Sarah and Jeff?  <a href="/guest/email">Click here to send us an email.</a></p>
     
-    <div>
-        <label for="notes">Notes:</label><br>
-        <textarea id="notes" name="notes" value="notes">{notes}</textarea>
-    </div>
-    <input type="submit" value="Submit">    
-</form>
+      
+
 
 

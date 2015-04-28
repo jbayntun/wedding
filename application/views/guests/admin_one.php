@@ -19,11 +19,7 @@
                 <a href="/guest/delete_group/{id}">Delete</a>
             </td>
         </tr>
-    </table>
-    
-    <div class="notes">
-        <p><strong>Notes:</strong> {notes}</p>
-    </div>  
+    </table>  
 </div>
     
 <h3>Guest <span>Info</span></h3>
