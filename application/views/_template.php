@@ -43,7 +43,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         $(document).ready(function(){
           $('.data-slick').slick({
             accessibility: false,
-            autoplay: true
+            autoplay: true,
+            adaptiveHeight: false
           });
         });
     </script>
