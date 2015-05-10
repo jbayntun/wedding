@@ -6,13 +6,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * and open the template in the editor.
  */
 
+
 /**
  * Description of Mailer
  *
  * @author Jeffrey
  */
 class Mailer extends MY_Controller 
-{
+{    
     public function __construct()
     {
         parent::__construct();
@@ -35,22 +36,53 @@ class Mailer extends MY_Controller
         
         //for each group, get guests
         foreach($groups as $group)
-        {
-            $this->handle_group($group);
+        {            
+            $group->guests = $this->guests->get_by_group($group->id);
+            foreach($group->guests as $guest)
+            {
+                $guest->disabled = ($guest->email) ? "": 'disabled="disabled"';
+            }
         }
+        $this->data['groups']  = $groups;
+        $this->data['page_body']  = 'emails';
+        $this->render();
     }
     
-    private function handle_group($group)
-    {
+    private function handle_group($group, $mail_info, $results)
+    { 
         $group->guests = $this->guests->get_by_group($group->id);
         $message = $this->make_invitation($group);
         
+        
+        
         foreach($group->guests as $guest)
         {
-            if($guest->email != NULL)
+            if($this->input->post($guest->id) == 2)
             {
-                if(!$this->send_mail($guest->email, $message, "test invitation", $guest->first_name, true))
-					break;
+                $results->none_sent++;
+                return;
+            }
+
+            $good;
+            if($this->input->post($guest->id) == 'hers')
+            {
+                $good = $this->send_mail($guest->email, $message, "test invitation", $guest->first_name, $mail_info->her_email, $mail_info->her_pass, $mail_info->her_name, $mail_info->her_server, true);
+                $results->sent_hers = ($good === 0) ? $results->sent_hers + 1 : $results->sent_hers;
+            }
+            else if($this->input->post($guest->id) == 'his')
+            {
+                $good = $this->send_mail($guest->email, $message, "test invitation", $guest->first_name, $mail_info->his_email, $mail_info->his_pass, $mail_info->his_name, $mail_info->his_server, true);
+                $results->sent_his = ($good === 0) ? $results->sent_his + 1 : $results->sent_his;
+            }
+            else
+            {
+                $results->none_sent++;
+                $good = 0;
+            }
+            
+            if($good !== 0)
+            {
+                $results->errors[$guest->email] = $good;
             }
         }
         
@@ -59,18 +91,63 @@ class Mailer extends MY_Controller
         $this->groups->update($group);
     }
     
-    private function send_mail($address, $message, $subject, $name, $invitation) {
+    public function send_invitations()
+    {
+        // check admin
+        if (!$this->session->userdata('is_admin'))
+        {
+            // No access if not admin.
+            redirect('/not_admin');
+        }
+        ini_set('max_execution_time', 600);
+                
+        $mail_info =  new stdClass();
+        $mail_info->his_email = $this->input->post('his_email');
+        $mail_info->his_pass = $this->input->post('his_pass');
+        $mail_info->his_server = $this->input->post('his_server');
+        $mail_info->his_name = "Jeff Bayntun";
+        
+        $mail_info->her_email = $this->input->post('her_email');
+        $mail_info->her_pass = $this->input->post('her_pass');
+        $mail_info->her_server = $this->input->post('her_server');
+        $mail_info->her_name = "Sarah Wu";
+        
+        $results = new stdClass();
+        $results->sent_his = 0;
+        $results->sent_hers = 0;
+        $results->none_sent = 0;
+        $results->errors = array();
+        
+        $groups = $this->groups->all();
+        
+        foreach($groups as $group)
+        {
+            $this->handle_group($group, $mail_info, $results);
+        }
+        
+        $message =  "His Sent: " . $results->sent_his . '<br/>';
+        $message .= "Hers Sent: " . $results->sent_hers . '<br/>';
+        $message .= "None Sent: " . $results->none_sent . '<br/>';
+        $message .= "Errors:" . '<br/>';
+        foreach($results->errors as $key => $value)
+        {
+            $message .= "    " . $key . "  " . $value . '<br/><br/>';
+        }
+        $this->thankyou($message);
+    }
+    
+    private function send_mail($address, $message, $subject, $name, $user, $pass, $from_name, $server, $invitation) {
         
         $mail = new PHPMailer();
         $mail->IsSMTP(); // we are going to use SMTP
         $mail->SMTPAuth   = true; // enabled SMTP authentication
         $mail->SMTPSecure = "tls";  // prefix for secure protocol to connect to the server
-        $mail->Host       = "smtp-mail.outlook.com";      // setting GMail as our SMTP server
+        $mail->Host       = $server;      // setting GMail as our SMTP server
         $mail->Port       = 587;                   // SMTP port to connect to GMail
-        $mail->Username   = "hotmail.com";  // user email address
-        $mail->Password   = "";            // password in GMail
-        $mail->setFrom('@hotmail.com', 'Jeff Bayntun');  //Who is sending the email
-        $mail->addReplyTo('@hotmail.com', 'Jeff Bayntun');  //email address that receives the response
+        $mail->Username   = $user;  // user email address
+        $mail->Password   = $pass;            // password in GMail
+        $mail->setFrom($user, $from_name);  //Who is sending the email
+        $mail->addReplyTo($user, $from_name);  //email address that receives the response
         $mail->Subject    = $subject;
         $mail->Body      = $message;
         $mail->AltBody    = "Plain text message";
@@ -81,10 +158,9 @@ class Mailer extends MY_Controller
 		}
         
         if(!$mail->send()) {
-            echo "Mailer Error: " . $mail->ErrorInfo . '</br>';
-			return false;
+            return "Mailer Error: " . $mail->ErrorInfo . '</br>';
         } else {
-            return true;
+            return 0;
         }
         
     }
@@ -121,36 +197,35 @@ class Mailer extends MY_Controller
         
         }
 		
-		public function feedback()
-		{
-			if (!$this->session->has_userdata('username'))
-			{
-				// User is not logged in.
-				$this->data['page_body'] = '/login';
-				$this->render();
-				return;
-			}
-			
-			// User is logged in as a guest.
-			$group = $this->groups->get_by_username(
-                 $this->session->userdata('username'));
-				 
-			$message = $this->input->post('message');
-			$subject = "Wedding Feedback - " . $group->username . " - " . $this->input->post('subject');
-			$name = $this->input->post('name');
-			$address = "j_bayntun@hotmail.com";
-			
-			$this->send_mail($address, $message, $subject, $name, false);
-			
-			$message = "Thanks for the email!  We'll get back to you soon";
-			$this->thankyou($message);
-			
-		}
+        public function feedback()
+        {
+            if (!$this->session->has_userdata('username'))
+            {
+                // User is not logged in.
+                $this->data['page_body'] = '/login';
+                $this->render();
+                return;
+            }
+
+            // User is logged in as a guest.
+            $group = $this->groups->get_by_username(
+            $this->session->userdata('username'));
+
+            $message = $this->input->post('message');
+            $subject = "Wedding Feedback - " . $group->username . " - " . $this->input->post('subject');
+            $name = $this->input->post('name');
+            $address = "j_bayntun@hotmail.com";
+
+            $this->send_mail($address, $message, $subject, $name, "j_bayntun@hotmail.com", $need_pass, "Jeff Bayntun", 'smtp-mail.outlook.com', false);
+
+            $message = "Thanks for the email!  We'll get back to you soon";
+            $this->thankyou($message);
+        }
 		
-		public function thankyou($message)
+        public function thankyou($message)
 	{
-		$this->data['page_body']  = 'thankyou';
-        $this->data['message'] = $message;
-        $this->render();
+            $this->data['page_body']  = 'thankyou';
+            $this->data['message'] = $message;
+            $this->render();
 	}
 }
