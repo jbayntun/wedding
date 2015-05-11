@@ -51,9 +51,7 @@ class Mailer extends MY_Controller
     private function handle_group($group, $mail_info, $results)
     { 
         $group->guests = $this->guests->get_by_group($group->id);
-        $message = $this->make_invitation($group);
-        
-        
+        $message = $this->make_invitation($group);        
         
         foreach($group->guests as $guest)
         {
@@ -155,6 +153,7 @@ class Mailer extends MY_Controller
 		if($invitation)
 		{
 			$mail->addEmbeddedImage('C:\xampp\htdocs\wedding\assets\images\invitation.jpg', 'invitation');
+                        $mail->addEmbeddedImage('C:\xampp\htdocs\wedding\assets\images\park.jpg', 'park');
 		}
         
         if(!$mail->send()) {
@@ -168,34 +167,57 @@ class Mailer extends MY_Controller
     
     private function make_invitation($group)
     {
-        $message = '<html><head><title>Wedding Invitation</title></head><body>';
-        
-        $message .= '<p>Dear ';
+        $guests = '';
         foreach($group->guests as $g)
         {
-            $message .= $g->first_name. ', ';
+            $guests .= $g->first_name. ', ';
         }
-        
-        $message .= '</p>';
-        
-        $message .= "<p>You're Invited...</p>";
-        
-        $message .= '<img src="cid:invitation" width="600"/>';
-        
-        $message .= '<p>For more information, and to RSVP, please visit our ';
-        $message .= '<a href="http://wedding.mellifluous.ca">Website</a></p>';
-        
-        $message .= '<p><span class="bold">Username: </span> ' . $group->username . '<br/>';
-        $message .= '<p><span class="bold">Password: </span> ' . $group->value . '</p>';
-        
-        $message .= '<p>In lieu of gifts, the betrothed would prefer money to spend on shoes.</p>';
-        $message .= '<p>Please RSVP no later than August 1st, 2015.</p>';
-        
-        $message .= ' </table></body></html>';
+        $message = '' . $this->make_header();
+        $message .= $this->make_body($guests, $group->username, $group->password);
         
         return $message;
         
         }
+        
+        private function make_header()
+        {
+            $head = '<html><head>';
+            $head .= '<title>Bayntun Wu Wedding Invitation</title>';
+            $head .= '<style type="text/css">';
+            $head .= '@import url(http://fonts.googleapis.com/css?family=Tangerine:700);';
+            $head .= '@media screen {';
+            $head .= '.mainfont { color: black; font-family: "Century Gothic", sans-serif !important;';
+            $head .= 'font-size: 1em; line-height: 1.5em;}';
+            
+            $head .= '.headerfont { font-family: "Tangerine", cursive, sans-serif !important; font-size: 5em;';
+            $head .= '}}</style></head>';
+            
+            return $head;
+        }
+        
+        private function make_body($guests, $username, $password)
+        {
+            $body = '<body>';
+            $body .= '<div style="border-style: solid; border-width: 8px; border-color: #CC117A; margin: 2px; background-color: #fdf9f3;">';
+            $body .= '<div class="mainfont" style="border-style: solid; border-width: 8px; border-color: #CC117A; margin: 14px; padding-top: 50px; padding-bottom: 50px;">';
+            $body .= '<div style="text-align: center">';
+            $body .= '<h2 class="headerfont"><span style="color: #39baf8;">Dear </span>' . $guests . '</h2>';
+            $body .= "<p>You're invited:</p>";
+            $body .= '<img src="cid:invitation" width="600" height="439" alt="Invitation" style=" -webkit-box-shadow: 0 0 3px 2px #666; box-shadow: 0 0 3px 2px #666; margin: 30px;"></img>';
+            $body .= '<p>For more information, and to RSVP, please visit <a href="http://wedding.mellifluous.ca">our Website.</a></p>';
+            $body .= '<p><span style="font-weight: bold;">Username:</span> ' . $username . '</p>';
+            $body .= '<p><span style="font-weight: bold;">Password:</span> ' . $password . '</p>';
+            $body .= '<p>Something about dolla bills in place of gifts</p>';
+            $body .= '<p>Please RSVP no later than August 1st, 2015</p>';
+            $body .= '<p>We hope to see you there!</p>';
+            $body .= '<img src="cid:park" width="400" height="368" style=" border-radius: 20px; -webkit-box-shadow: 0 0 5px 2px; box-shadow: 0 0 5px 2px; margin: 30px;"></img>';
+            $body .= '<p class="headerfont">Sarah & <span style="color: #39baf8;">Jeff</span></p>';
+            $body .= '</div></div></div></body></html>';
+            
+            return $body;
+        }
+        
+        
 		
         public function feedback()
         {
