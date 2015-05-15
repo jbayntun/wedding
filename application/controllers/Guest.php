@@ -28,6 +28,7 @@ class Guest extends MY_Controller
         if (!$this->session->has_userdata('username'))
         {
             // User is not logged in.
+			$this->data['result'] = '';
             $this->data['page_body'] = '/login';
             $this->render();
             return;
@@ -60,6 +61,7 @@ class Guest extends MY_Controller
         if (!$this->session->has_userdata('username'))
         {
             // User is not logged in.
+			$this->data['result'] = '';
             $this->data['page_body'] = '/login';
             $this->render();
             return;
@@ -437,6 +439,7 @@ class Guest extends MY_Controller
 		if (!$this->session->has_userdata('username'))
 		{
 			// User is not logged in.
+			$this->data['result'] = '';
 			$this->data['page_body'] = '/login';
 			$this->render();
 			return;
